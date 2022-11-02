@@ -22,6 +22,8 @@ meta:
 	ADDON_URL = http://github.com/roymacdonald/ofxGuiTooltip
 
 common:
+	
+	ADDON_DEFINES = USE_OFX_GUI_TOOLTIP
 	# dependencies with other addons, a list of them separated by spaces 
 	# or use += in several lines
 	# ADDON_DEPENDENCIES =
