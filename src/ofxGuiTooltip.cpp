@@ -7,38 +7,43 @@
 
 #include "ofxGuiTooltip.h"
 
+
 void ofxGuiTooltip::getSetTooltip(ofxBaseGui* gui, ofJson &json, bool bIsGroup){
     if(gui){
-//        cout << "---------getSetTooltip-------------\n";
         
         string name = gui->getName();
         if(bIsGroup){
             name = "tooltip";
-//            cout << "   group " << name << endl;
-//            name += "_Gui_group_tooltip";
-            if(json.contains(name)){
-                json.at(name).get_to(tooltipsMap[gui]);
-            }else{
-                json[name] = "";
-            }
-        }else{
-            if(json.contains(name)){
-                json.at(name).get_to(tooltipsMap[gui]);
-            }else{
-                json[name] = "";
-            }
         }
-//        cout << json.dump(4) << endl;
-//        if(json == nullptr){
-//
-//        }
-        
+
+#ifdef USE_OFX_DROPDOWN
+        ofxDropdownOption * d = dynamic_cast<ofxDropdownOption*>(gui);
+        if(d){
+            d->setupTooltip(json);
+            auto it = find (dropDowns.begin(), dropDowns.end(), d);
+            if (it == dropDowns.end()){
+                dropDowns.push_back(d);
+            }
+            
+        }else{
+#endif
+        static ofBitmapFont bf;
+        if(json.contains(name)){
+            json.at(name).get_to(tooltipsMap[gui].text);
+            tooltipsMap[gui].boundingBox = bf.getBoundingBox(tooltipsMap[gui].text, 0,0);
+        }else{
+            json[name] = "";
+        }
+#ifdef USE_OFX_DROPDOWN
+        }
+#endif
         
     }
 }
 
 //---------------------------------------------------------------------
-void ofxGuiTooltip::getGuiControlPaths(ofxGuiGroup* group, ofJson &json, string prefix){
+
+void ofxGuiTooltip::getGuiControlPaths(ofxGuiGroup* group, ofJson &json){
     if(group == nullptr){
         return;
     }
@@ -47,16 +52,7 @@ void ofxGuiTooltip::getGuiControlPaths(ofxGuiGroup* group, ofJson &json, string 
     auto n = group->getNumControls();
     try
     {
-        
-        
-//        string basePath = ofFilePath::join(prefix, group->getName());
-//        string name = group->getName() + "_Gui_group_tooltip";
-//
-//        if(json.contains(name)){
-//            json.at(name).get_to(tooltipsMap[group]);
-//        }else{
-//            json[name] = "";
-//        }
+
         getSetTooltip(group, json, true);
         
         for(size_t i = 0; i < n; i++){
@@ -65,17 +61,9 @@ void ofxGuiTooltip::getGuiControlPaths(ofxGuiGroup* group, ofJson &json, string 
                 
                 ofxGuiGroup * g = dynamic_cast<ofxGuiGroup*>(c);
                 if(g){
-//                    cout << prefix << " group : " << c->getName() << endl;
-                    getGuiControlPaths(g,  json[c->getName()], prefix + "    ");
+                    getGuiControlPaths(g,  json["group"][c->getName()]);
                 }else{
-//                    cout << prefix << c->getName() << endl;
                     getSetTooltip(c, json["group"]);
-//                    name = c->getName();
-//                    if(json.contains(name)){
-//                        json.at(name).get_to(tooltipsMap[c]);
-//                    }else{
-//                        json[name] = "";
-//                    }
                 }
             }
         }
@@ -88,7 +76,6 @@ void ofxGuiTooltip::getGuiControlPaths(ofxGuiGroup* group, ofJson &json, string 
     }
 }
 
-//---------------------------------------------------------------------
 ofxBaseGui* ofxGuiTooltip::findOverGui(ofxGuiGroup* group, float x, float y){
     if(group == nullptr){
         return nullptr;
@@ -104,14 +91,11 @@ ofxBaseGui* ofxGuiTooltip::findOverGui(ofxGuiGroup* group, float x, float y){
         }
     }
     
-//    headerRect.set(b.x, b.y , b.width, defaultHeight);
-    
     auto n = group->getNumControls();
     
     for(size_t i = 0; i < n; i++){
         ofxBaseGui* c = group->getControl(i);
         if(c){
-//            cout << c->getShape() << "\n";
             if(c->getShape().inside(x, y)){
                 ofxGuiGroup * g = dynamic_cast<ofxGuiGroup*>(c);
                 if(g){
@@ -121,34 +105,19 @@ ofxBaseGui* ofxGuiTooltip::findOverGui(ofxGuiGroup* group, float x, float y){
             }
         }
     }
-    return nullptr;//static_cast<ofxBaseGui*>(group);
+    return nullptr;
 }
 
 //---------------------------------------------------------------------
 void ofxGuiTooltip::registerGui(ofxGuiGroup* group, const string& stringsFilepath, const string& jsonSubPath){
-//    if(!ofFile::doesFileExist(stringsFilepath)){
-//        ofLogNotice("ofxGuiTooltip::registerGui") << "File path does not exist. Cant load";
-//        return;
-        
-//    }
-    bool bFound = false;
-    for(auto g : guis){
-        if(g && g == group){
-            bFound = true;
-            break;
-//            ofLogNotice("ofxGuiTooltip::registerGui") << "Gui already registered.";
-//            return;
-        }
-    }
-    if(!bFound){
-        guis.push_back(group);
-    }
+
+    addGuiGroup(group);
     ofJson json;
     if(ofFile::doesFileExist(stringsFilepath)){
         json = ofLoadJson(stringsFilepath);
     }
     
-    getGuiControlPaths(group, (jsonSubPath.empty())?json:json[jsonSubPath]);
+    getGuiControlPaths(group, (jsonSubPath.empty())?json:json[ofJson::json_pointer(jsonSubPath)]);
 //    if(!jsonSubPath.empty()){
         ofSavePrettyJson(stringsFilepath, json);
 //    }
@@ -156,10 +125,33 @@ void ofxGuiTooltip::registerGui(ofxGuiGroup* group, const string& stringsFilepat
 }
 
 //---------------------------------------------------------------------
+void ofxGuiTooltip::eraseFromTooltipsMap(ofxBaseGui* g){
+    if(!g)return;
+    
+    ofxGuiGroup * group = dynamic_cast<ofxGuiGroup*>(g);
+    if(group){
+        size_t n = group->getNumControls();
+        for(size_t i = 0; i < n ; i ++){
+            eraseFromTooltipsMap(group->getControl(i));
+        }
+    }else{
+        if(tooltipsMap.count(g)){
+            tooltipsMap.erase(g);
+        }
+    }
+}
+
+//---------------------------------------------------------------------
 void ofxGuiTooltip::unregisterGui(ofxGuiGroup* group){
-    ofRemove(guis, [group](ofxGuiGroup*g){
-        return g == group;
+    size_t n = guis.size();
+    ofRemove(guis, [group](GuiGroupPointers& g){
+        return g.gui == group;
     });
+    
+    if(n != guis.size()){
+        eraseFromTooltipsMap(group);
+    }
+    
     if(guis.size() == 0){
         disable();
     }
@@ -173,17 +165,25 @@ void ofxGuiTooltip::clear(){
 //---------------------------------------------------------------------
 void ofxGuiTooltip::draw(){
     if(bIsEnabled){
-        float x = ofGetMouseX();
-        float y = ofGetMouseY();
-//        for(auto g: tooltipsMap){
-//            if(g.first && g.first->getShape().inside(x, y)){
-//                ofDrawBitmapStringHighlight(g.second, x, y - 20, ofColor::lightYellow, ofColor::black);
-//            }
-//        }
         if(overGui){
-            ofDrawBitmapStringHighlight(currentTooltip, x, y - 20, ofColor::lightYellow, ofColor::black);
+            float x = ofGetMouseX();
+            float y = ofGetMouseY();
+            if(!currentTooltip.text.empty()){
+                if(x > ofGetWidth() - currentTooltip.boundingBox.width){
+                    x = ofGetWidth() - currentTooltip.boundingBox.width;
+                }
+                y = y - currentTooltip.boundingBox.y + 20;
+                
+                ofDrawBitmapStringHighlight(currentTooltip.text, x, y , ofColor::lightYellow, ofColor::black);
+            }
         }
-        
+#ifdef USE_OFX_DROPDOWN
+        for(auto d: dropDowns){
+            if(d){
+                d->drawTooltip();
+            }
+        }
+#endif
     }
 }
 
@@ -191,7 +191,7 @@ void ofxGuiTooltip::draw(){
 void ofxGuiTooltip::registerMouse(){
     if(!bMouseRegistered){
         bMouseRegistered = true;
-        listeners.push(ofEvents().mouseMoved.newListener(this, &ofxGuiTooltip::mouseOver, -100));
+        listeners.push(ofEvents().mouseMoved.newListener(this, &ofxGuiTooltip::mouseOver, -1000));
     }
 }
 
@@ -208,12 +208,14 @@ void ofxGuiTooltip::mouseOver(ofMouseEventArgs& args){
     
     auto x = args.x;
     auto y = args.y;
+    
     auto prevOverGui = overGui;
     overGui = nullptr;
-    currentTooltip = "";
-    for(auto g : guis){
-        if(g){
-            auto c = findOverGui(g, x,y);
+
+    currentTooltip.clear();
+    for(auto& g : guis){
+        if(g.gui){
+            auto c = findOverGui(g.gui, x,y);
             if(c){
                 overGui = c;
                 if(tooltipsMap.count(overGui)){
@@ -238,4 +240,20 @@ void ofxGuiTooltip::disable(){
     bIsEnabled = false;
     unregisterMouse();
 }
-
+    //---------------------------------------------------------------------
+bool ofxGuiTooltip::addGuiGroup(ofxGuiGroup* group, bool bIsDropdown){
+    bool bFound = false;
+    for(auto &g : guis){
+        if(g.gui && g.gui == group){
+            bFound = true;
+            return false;
+        }
+    }
+    if(!bFound){
+        guis.push_back(GuiGroupPointers());
+        guis.back().gui = group;
+        guis.back().bIsDropdown = bIsDropdown;
+        return true;
+    }
+    return false;
+}
