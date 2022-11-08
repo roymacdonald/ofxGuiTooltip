@@ -234,11 +234,26 @@ bool ofxGuiTooltip::isEnabled(){
 void ofxGuiTooltip::enable(){
     bIsEnabled = true;
     registerMouse();
+#ifdef USE_OFX_DROPDOWN
+        for(auto d: dropDowns){
+            if(d){
+                d->enableTooltip();
+            }
+        }
+#endif
+
 }
 //---------------------------------------------------------------------
 void ofxGuiTooltip::disable(){
     bIsEnabled = false;
     unregisterMouse();
+#ifdef USE_OFX_DROPDOWN
+        for(auto d: dropDowns){
+            if(d){
+                d->disableTooltip();
+            }
+        }
+#endif
 }
     //---------------------------------------------------------------------
 bool ofxGuiTooltip::addGuiGroup(ofxGuiGroup* group, bool bIsDropdown){
