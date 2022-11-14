@@ -27,10 +27,11 @@ void ofxGuiTooltip::getSetTooltip(ofxBaseGui* gui, ofJson &json, bool bIsGroup){
             
         }else{
 #endif
-        static ofBitmapFont bf;
+//        static ofBitmapFont bf;
         if(json.contains(name)){
-            json.at(name).get_to(tooltipsMap[gui].text);
-            tooltipsMap[gui].boundingBox = bf.getBoundingBox(tooltipsMap[gui].text, 0,0);
+            add(gui, json.at(name));
+//            json.at(name).get_to(tooltipsMap[gui].text);
+//            tooltipsMap[gui].boundingBox = bf.getBoundingBox(tooltipsMap[gui].text, 0,0);
         }else{
             json[name] = "";
         }
@@ -40,6 +41,7 @@ void ofxGuiTooltip::getSetTooltip(ofxBaseGui* gui, ofJson &json, bool bIsGroup){
         
     }
 }
+
 
 //---------------------------------------------------------------------
 
@@ -144,8 +146,8 @@ void ofxGuiTooltip::eraseFromTooltipsMap(ofxBaseGui* g){
 //---------------------------------------------------------------------
 void ofxGuiTooltip::unregisterGui(ofxGuiGroup* group){
     size_t n = guis.size();
-    ofRemove(guis, [group](GuiGroupPointers& g){
-        return g.gui == group;
+    ofRemove(guis, [group](ofxGuiGroup* g){
+        return g == group;
     });
     
     if(n != guis.size()){
@@ -159,6 +161,7 @@ void ofxGuiTooltip::unregisterGui(ofxGuiGroup* group){
 
 //---------------------------------------------------------------------
 void ofxGuiTooltip::clear(){
+    tooltipsMap.clear();
     guis.clear();
 }
 
@@ -214,8 +217,8 @@ void ofxGuiTooltip::mouseOver(ofMouseEventArgs& args){
 
     currentTooltip.clear();
     for(auto& g : guis){
-        if(g.gui){
-            auto c = findOverGui(g.gui, x,y);
+        if(g){
+            auto c = findOverGui(g, x,y);
             if(c){
                 overGui = c;
                 if(tooltipsMap.count(overGui)){
@@ -256,19 +259,67 @@ void ofxGuiTooltip::disable(){
 #endif
 }
     //---------------------------------------------------------------------
-bool ofxGuiTooltip::addGuiGroup(ofxGuiGroup* group, bool bIsDropdown){
+bool ofxGuiTooltip::addGuiGroup(ofxGuiGroup* group){
+    if(!group)return false;
     bool bFound = false;
     for(auto &g : guis){
-        if(g.gui && g.gui == group){
+        if(g && g == group){
             bFound = true;
             return false;
         }
     }
     if(!bFound){
-        guis.push_back(GuiGroupPointers());
-        guis.back().gui = group;
-        guis.back().bIsDropdown = bIsDropdown;
+        guis.push_back(group);
         return true;
     }
     return false;
+}
+
+
+
+void ofxGuiTooltip::add(ofxGuiGroup* group, ofAbstractParameter& param,  const string& tooltip_text){
+    if(!group){
+        ofLogWarning("ofxGuiTooltip::add") << "Passed ofxGuiGroup pointer is null.";
+        return;
+    }
+    if(group->getParameter().isReferenceTo(param)){
+        add(group, tooltip_text);
+        addGuiGroup(group);
+    }
+    
+    
+    auto n = group->getNumControls();
+    
+    for(size_t i = 0; i < n; i++){
+        ofxBaseGui* c = group->getControl(i);
+        if(c){
+            ofxGuiGroup * g = dynamic_cast<ofxGuiGroup*>(c);
+            if(g){
+                add(g,  param, tooltip_text);
+            }else{
+                if(c->getParameter().isReferenceTo(param)){
+//                    cout << "AddTooltip to " << group->getName() << "  " << param.getName() << " : " << tooltip_text << "\n";
+                    add(c, tooltip_text);
+                    addGuiGroup(group);
+                    return;
+                }
+            }
+        }
+    }
+}
+
+void ofxGuiTooltip::add(ofxBaseGui* gui, const string& text){
+    if(!gui) return;
+    if(tooltipsMap.count(gui)){
+        ofLogWarning("ofxGuiTooltip::add") << "There is already a tooltip for this gui. Overwritting\n";
+    }
+    if(!addGuiGroup(dynamic_cast<ofxGuiGroup*>(gui))){
+        auto p = gui->getParent();
+        if(p){
+            addGuiGroup(dynamic_cast<ofxGuiGroup*>(p));
+        }
+    }
+    static ofBitmapFont bf;
+    tooltipsMap[gui].text = text;
+    tooltipsMap[gui].boundingBox = bf.getBoundingBox(tooltipsMap[gui].text, 0,0);
 }
