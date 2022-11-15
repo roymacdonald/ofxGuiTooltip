@@ -27,14 +27,12 @@ void ofxGuiTooltip::getSetTooltip(ofxBaseGui* gui, ofJson &json, bool bIsGroup){
             
         }else{
 #endif
-//        static ofBitmapFont bf;
-        if(json.contains(name)){
-            add(gui, json.at(name));
-//            json.at(name).get_to(tooltipsMap[gui].text);
-//            tooltipsMap[gui].boundingBox = bf.getBoundingBox(tooltipsMap[gui].text, 0,0);
-        }else{
-            json[name] = "";
+        if(json.contains(name) == false){
+//            add(gui, json.at(name));
+//        }else{
+            json[name] = "Tooltip for " +  gui->getName() + ". Change this text.";
         }
+        add(gui, json.at(name));
 #ifdef USE_OFX_DROPDOWN
         }
 #endif
@@ -49,12 +47,9 @@ void ofxGuiTooltip::getGuiControlPaths(ofxGuiGroup* group, ofJson &json){
     if(group == nullptr){
         return;
     }
-    
-    
     auto n = group->getNumControls();
     try
     {
-
         getSetTooltip(group, json, true);
         
         for(size_t i = 0; i < n; i++){
@@ -120,9 +115,9 @@ void ofxGuiTooltip::registerGui(ofxGuiGroup* group, const string& stringsFilepat
     }
     
     getGuiControlPaths(group, (jsonSubPath.empty())?json:json[ofJson::json_pointer(jsonSubPath)]);
-//    if(!jsonSubPath.empty()){
-        ofSavePrettyJson(stringsFilepath, json);
-//    }
+
+    ofSavePrettyJson(stringsFilepath, json);
+
     enable();
 }
 
@@ -298,7 +293,6 @@ void ofxGuiTooltip::add(ofxGuiGroup* group, ofAbstractParameter& param,  const s
                 add(g,  param, tooltip_text);
             }else{
                 if(c->getParameter().isReferenceTo(param)){
-//                    cout << "AddTooltip to " << group->getName() << "  " << param.getName() << " : " << tooltip_text << "\n";
                     add(c, tooltip_text);
                     addGuiGroup(group);
                     return;
