@@ -649,6 +649,10 @@ fi
 				<string>E4EB6923138AFD0F00A09F29</string>
 				<key>buildSettings</key>
 				<dict>
+					<key>GCC_PREPROCESSOR_DEFINITIONS</key>
+					<array>
+						<string>USE_OFX_GUI_TOOLTIP</string>
+					</array>
 					<key>CONFIGURATION_BUILD_DIR</key>
 					<string>$(SRCROOT)/bin/</string>
 					<key>COPY_PHASE_STRIP</key>
@@ -715,6 +719,10 @@ fi
 				<string>E4EB6923138AFD0F00A09F29</string>
 				<key>buildSettings</key>
 				<dict>
+					<key>GCC_PREPROCESSOR_DEFINITIONS</key>
+					<array>
+						<string>USE_OFX_GUI_TOOLTIP</string>
+					</array>
 					<key>COMBINE_HIDPI_IMAGES</key>
 					<string>YES</string>
 					<key>COPY_PHASE_STRIP</key>
@@ -3491,6 +3499,10 @@ fi
 				<string>E4EB6923138AFD0F00A09F29</string>
 				<key>buildSettings</key>
 				<dict>
+					<key>GCC_PREPROCESSOR_DEFINITIONS</key>
+					<array>
+						<string>USE_OFX_GUI_TOOLTIP</string>
+					</array>
 					<key>ENABLE_TESTABILITY</key>
 					<string>YES</string>
 					<key>CONFIGURATION_BUILD_DIR</key>
@@ -3555,6 +3567,10 @@ fi
 				<string>E4EB6923138AFD0F00A09F29</string>
 				<key>buildSettings</key>
 				<dict>
+					<key>GCC_PREPROCESSOR_DEFINITIONS</key>
+					<array>
+						<string>USE_OFX_GUI_TOOLTIP</string>
+					</array>
 					<key>CONFIGURATION_BUILD_DIR</key>
 					<string>$(SRCROOT)/bin/</string>
 					<key>COPY_PHASE_STRIP</key>
@@ -3671,7 +3687,7 @@ fi
 				<key>isa</key>
 				<string>PBXNativeTarget</string>
 				<key>name</key>
-				<string>example</string>
+				<string>example-json</string>
 				<key>productName</key>
 				<string>myOFApp</string>
 				<key>productReference</key>
@@ -3688,7 +3704,7 @@ fi
 				<key>isa</key>
 				<string>PBXFileReference</string>
 				<key>path</key>
-				<string>exampleDebug.app</string>
+				<string>example-jsonDebug.app</string>
 				<key>sourceTree</key>
 				<string>BUILT_PRODUCTS_DIR</string>
 			</dict>
@@ -3713,6 +3729,10 @@ fi
 				<string>E4EB6923138AFD0F00A09F29</string>
 				<key>buildSettings</key>
 				<dict>
+					<key>GCC_PREPROCESSOR_DEFINITIONS</key>
+					<array>
+						<string>USE_OFX_GUI_TOOLTIP</string>
+					</array>
 					<key>COMBINE_HIDPI_IMAGES</key>
 					<string>YES</string>
 					<key>COPY_PHASE_STRIP</key>
@@ -3765,6 +3785,10 @@ fi
 				<string>E4EB6923138AFD0F00A09F29</string>
 				<key>buildSettings</key>
 				<dict>
+					<key>GCC_PREPROCESSOR_DEFINITIONS</key>
+					<array>
+						<string>USE_OFX_GUI_TOOLTIP</string>
+					</array>
 					<key>COMBINE_HIDPI_IMAGES</key>
 					<string>YES</string>
 					<key>COPY_PHASE_STRIP</key>

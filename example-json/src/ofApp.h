@@ -25,8 +25,14 @@ class ofApp: public ofBaseApp{
         
     ofxPanel gui;
     
-    vector<ofParameter<float>> floats;
-    vector<ofParameterGroup> groups;
+    ofParameter<float> floats0;
+    ofParameter<float> floats1;
+    ofParameter<float> floats2;
+    ofParameter<float> floats3;
+    ofParameter<ofColor> color0;
+    ofParameter<int> int0;
+    ofParameterGroup group0;
+    ofParameterGroup group1;
     
     ofxGuiTooltip tooltips;
     
