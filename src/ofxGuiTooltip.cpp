@@ -8,6 +8,7 @@
 #include "ofxGuiTooltip.h"
 
 
+
 void ofxGuiTooltip::getSetTooltip(ofxBaseGui* gui, ofJson &json, bool bIsGroup){
     if(gui){
         
@@ -15,28 +16,46 @@ void ofxGuiTooltip::getSetTooltip(ofxBaseGui* gui, ofJson &json, bool bIsGroup){
         if(bIsGroup){
             name = "tooltip";
         }
-
-#ifdef USE_OFX_DROPDOWN
-        ofxDropdownOption * d = dynamic_cast<ofxDropdownOption*>(gui);
-        if(d){
-            d->setupTooltip(json);
-            auto it = find (dropDowns.begin(), dropDowns.end(), d);
-            if (it == dropDowns.end()){
-                dropDowns.push_back(d);
-            }
             
-        }else{
-#endif
+            ofxGuiTooltipBase * d = dynamic_cast< ofxGuiTooltipBase* >(gui);
+            if(d){
+                
+    //            cout << json.dump(4) << "\n";
+                d->setupTooltip(json);
+                auto it = find (baseTooltips.begin(), baseTooltips.end(), d);
+                if (it == baseTooltips.end()){
+                    baseTooltips.push_back(d);
+                }
+                return ;
+            }
+        
+//#ifdef USE_OFX_GUI_TABS
+//        cout << "ofxGuiTooltip::getSetTooltip USE_OFX_GUI_TABS\n";
+//        if(setTooltipFor<ofxGuiTabsOption>(gui, json, guiTabs)) return;
+//#endif
+        
+//#ifdef USE_OFX_DROPDOWN
+//        if(setTooltipFor<ofxDropdownOption>(gui, json, dropDowns)) return;
+        
+//        ofxDropdownOption * d = dynamic_cast<ofxDropdownOption*>(gui);
+//        if(d){
+//            d->setupTooltip(json);
+//            auto it = find (dropDowns.begin(), dropDowns.end(), d);
+//            if (it == dropDowns.end()){
+//                dropDowns.push_back(d);
+//            }
+//
+//        }else{
+//#endif
+        
+        
+        
         if(json.contains(name) == false){
 //            add(gui, json.at(name));
 //        }else{
             json[name] = "Tooltip for " +  gui->getName() + ". Change this text.";
         }
         add(gui, json.at(name));
-#ifdef USE_OFX_DROPDOWN
-        }
-#endif
-        
     }
 }
 
@@ -175,13 +194,12 @@ void ofxGuiTooltip::draw(){
                 ofDrawBitmapStringHighlight(currentTooltip.text, x, y , ofColor::lightYellow, ofColor::black);
             }
         }
-#ifdef USE_OFX_DROPDOWN
-        for(auto d: dropDowns){
+
+        for(auto d: baseTooltips){
             if(d){
                 d->drawTooltip();
             }
         }
-#endif
     }
 }
 
@@ -232,26 +250,24 @@ bool ofxGuiTooltip::isEnabled(){
 void ofxGuiTooltip::enable(){
     bIsEnabled = true;
     registerMouse();
-#ifdef USE_OFX_DROPDOWN
-        for(auto d: dropDowns){
-            if(d){
-                d->enableTooltip();
-            }
+    
+    for(auto d: baseTooltips){
+        if(d){
+            d->enableTooltip();
         }
-#endif
+    }
 
 }
 //---------------------------------------------------------------------
 void ofxGuiTooltip::disable(){
     bIsEnabled = false;
     unregisterMouse();
-#ifdef USE_OFX_DROPDOWN
-        for(auto d: dropDowns){
-            if(d){
-                d->disableTooltip();
-            }
+
+    for(auto d: baseTooltips){
+        if(d){
+            d->disableTooltip();
         }
-#endif
+    }
 }
     //---------------------------------------------------------------------
 bool ofxGuiTooltip::addGuiGroup(ofxGuiGroup* group){

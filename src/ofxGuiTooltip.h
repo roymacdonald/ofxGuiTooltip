@@ -8,9 +8,7 @@
 #include "ofMain.h"
 #include "ofxGui.h"
 
-#ifdef USE_OFX_DROPDOWN
-#include "ofxDropdown.h"
-#endif
+#include "ofxGuiTooltipBase.h"
 
 
 class ofxGuiTooltip{
@@ -111,8 +109,29 @@ private:
 
     void getSetTooltip(ofxBaseGui* gui, ofJson &json, bool bIsGroup = false);
 
+
     
-#ifdef USE_OFX_DROPDOWN
-    vector<ofxDropdownOption *> dropDowns;
-#endif
+    vector <ofxGuiTooltipBase*> baseTooltips;
+    
+//    template<typename T>
+//    bool setTooltipFor(ofxBaseGui* gui, ofJson &json, vector<T*>& collection){
+//        
+//        
+//        T * d = dynamic_cast< T* >(gui);
+//        if(d){
+//            cout << "setTooltipFor " << typeid(T).name() << "\n";
+////            cout << json.dump(4) << "\n";
+//            d->setupTooltip(json);
+//            auto it = find (collection.begin(), collection.end(), d);
+//            if (it == collection.end()){
+//                collection.push_back(d);
+//            }
+//            return true;
+//        }
+//        return false;
+//    }
+
+    
+    
 };
+
