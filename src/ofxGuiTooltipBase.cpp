@@ -17,6 +17,7 @@ void ofxGuiTooltipBase::setupTooltip(const std::string& jsonFilePath){
     }
 }
 
+//--------------------------------------------------------------
 void ofxGuiTooltipBase::setupTooltip(ofJson & json){
     if(!guiElement){
         ofLogWarning("ofxGuiTooltipBase::setupTooltip") << "guiElement is nullptr!";
@@ -32,34 +33,41 @@ void ofxGuiTooltipBase::setupTooltip(ofJson & json){
     }
 }
 
+//--------------------------------------------------------------
 void ofxGuiTooltipBase::setTooltipText(const std::string& text){
-//    cout << "ofxDropdownOption::setTooltipText " << text << "\n";
     tooltipText = text;
     ofBitmapFont bf;
     tooltipRect = bf.getBoundingBox(text, 0, 0);
 }
+
+//--------------------------------------------------------------
 void ofxGuiTooltipBase::resetTooltips(){
     removeTooltip();
 }
 
+//--------------------------------------------------------------
 void ofxGuiTooltipBase::removeTooltip(){
     disableTooltip();
     tooltipText = "";
     tooltipRect.set(0, 0, 0, 0);
 }
 
+//--------------------------------------------------------------
 void ofxGuiTooltipBase::enableTooltip() {
     bTooltipsEnabled = true;
 }
 
+//--------------------------------------------------------------
 void ofxGuiTooltipBase::disableTooltip() {
     bTooltipsEnabled = false;
 }
 
+//--------------------------------------------------------------
 bool ofxGuiTooltipBase::isTooltipEnabled() {
     return bTooltipsEnabled;
 }
 
+//--------------------------------------------------------------
 void ofxGuiTooltipBase::drawTooltip(){
     if(!guiElement )return;
     
