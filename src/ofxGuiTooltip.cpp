@@ -126,17 +126,25 @@ ofxBaseGui* ofxGuiTooltip::findOverGui(ofxGuiGroup* group, float x, float y){
 
 //---------------------------------------------------------------------
 void ofxGuiTooltip::registerGui(ofxGuiGroup* group, const string& stringsFilepath, const string& jsonSubPath){
-
-    addGuiGroup(group);
+    
     ofJson json;
     if(ofFile::doesFileExist(stringsFilepath)){
         json = ofLoadJson(stringsFilepath);
     }
     
-    getGuiControlPaths(group, (jsonSubPath.empty())?json:json[ofJson::json_pointer(jsonSubPath)]);
+//    addGuiGroup(group);
+    
+//    getGuiControlPaths(group, (jsonSubPath.empty())?json:json[ofJson::json_pointer(jsonSubPath)]);
+    registerGui(group, (jsonSubPath.empty())?json:json[ofJson::json_pointer(jsonSubPath)]);
 
     ofSavePrettyJson(stringsFilepath, json);
 
+}
+
+//---------------------------------------------------------------------
+void ofxGuiTooltip::registerGui(ofxGuiGroup* group, ofJson &json){
+    addGuiGroup(group);
+    getGuiControlPaths(group, json);
     enable();
 }
 

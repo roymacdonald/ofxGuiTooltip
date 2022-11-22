@@ -27,6 +27,11 @@ public:
     ///\param jsonSubPath if not an empty string this will be used to set the json root from where to start scanning. This can be useful if you want to have several ofxGuiTooltip instances but you want to have all in a single json file
     void registerGui(ofxGuiGroup* group, const string& jsonFilepath, const string& jsonSubPath = "");
     
+    ///\brief register an ofxGuiGroup and set its tooltips from a json file. This function will scan all over the guigroup and see if there are any tooltips for its elements in the json file
+    ///\param group the gui group which will be scanned and add tooltips from it.
+    ///\param json  the json file that contains the tooltips texts. If no json file is found a new one will be created. If in the json file there is no tooltip for a gui element, the json file will be populated and saved so you can then open it and add the texts to it. super handy.     
+    void registerGui(ofxGuiGroup* group, ofJson &json);
+    
     
     ///\brief unregister (remove) a gui group that was previously registered with registerGui(...)
     ///\param group the group to remove
@@ -63,6 +68,21 @@ public:
     ///\param tooltip_text the text to be show as a tooltip
     ///it is necesary that the gui object passed belongs to an ofxGuiGroup that has been already registered either using the registerGui(...) or addGuiGroup(...) functions
     void add(ofxBaseGui* gui, const string& tooltip_text);
+    
+    
+//    void debugPrint(){
+//        cout << "debugPrint()\n";
+//        for(auto& t: tooltipsMap){
+//            if(t.first) std::cout << t.first->getName() << " : " << t.second.text << "\n";
+//        }
+//        for(auto b: baseTooltips)
+//        {
+//            if(b){
+//                std::cout << b->tooltipText << "\n";
+//            }
+//        }
+//    }
+    
     
 protected:
     
